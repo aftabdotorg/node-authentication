@@ -18,12 +18,15 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+
+//fire function before saving to db
 userSchema.pre("save", async function (next) {
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
+// static method to login 
 userSchema.statics.login = async function (email, password) {
   const user = await this.findOne({ email });
   if (user) {
@@ -31,10 +34,10 @@ userSchema.statics.login = async function (email, password) {
     if (auth) {
       return user;
     } else {
-      throw Error("Incorrect Password");
+      throw Error("incorrect password");
     }
   } else {
-    throw Error("Incorrect Email");
+    throw Error("incorrect email");
   }
 };
 

@@ -1,8 +1,11 @@
+require("dotenv").config();
 const express = require("express");
+const cookieParser = require("cookie-parser");
+const { requireAuth, checkUser } = require("./middleware/authMiddleware");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
-const cookieParser = require("cookie-parser");
 
+const port = process.env.PORT || 3001;
 const app = express();
 
 // middleware
@@ -14,24 +17,24 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 // database connection
-const dbURI =
-  "mongodb+srv://tester:test123@node-exp-auth.nifyro6.mongodb.net/node-auth";
+const dbURI = process.env.DBURI;
 mongoose
   .connect(dbURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
   })
-  .then((result) => app.listen(3000))
+  .then((result) => app.listen(port))
   .catch((err) => console.log(err));
 
 // routes
+app.get("*", checkUser);
 app.get("/", (req, res) => res.render("home"));
-app.get("/smoothies", (req, res) => res.render("smoothies"));
+app.get("/smoothies", requireAuth, (req, res) => res.render("smoothies"));
 app.use(authRoutes);
 
 // cookies
-
+/*
 app.get("/set-cookies", (req, res) => {
   // res.setHeader("Set-Cookie", "newUser=true"); // ! without cookie parser
   res.cookie("newUser", false); // ! using cookie-parser
@@ -50,3 +53,4 @@ app.get("/read-cookies", (req, res) => {
 
   res.json(cookies); 
 });
+*/
